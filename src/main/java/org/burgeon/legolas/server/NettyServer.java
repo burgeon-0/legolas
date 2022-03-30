@@ -40,7 +40,7 @@ public class NettyServer {
                             ChannelPipeline p = ch.pipeline();
                             p.addLast(new HttpRequestDecoder());
                             p.addLast(new HttpResponseEncoder());
-                            p.addLast(new CustomHttpServerHandler());
+                            p.addLast(new HttpServerHandler());
                         }
                     });
 
