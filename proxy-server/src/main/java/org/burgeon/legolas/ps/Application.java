@@ -1,8 +1,8 @@
-package org.burgeon.legolas;
+package org.burgeon.legolas.ps;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.burgeon.legolas.server.http.HttpProxyServer;
+import org.burgeon.legolas.ps.server.http.HttpProxyServer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

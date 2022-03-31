@@ -13,10 +13,20 @@
     <groupId>org.burgeon</groupId>
     <artifactId>legolas</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
     <name>legolas</name>
-    <description>Demo project for Spring Boot</description>
+    <description>Netty Proxy</description>
+
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+    </properties>
+
+    <modules>
+        <module>proxy-server</module>
+        <module>proxy-client</module>
+    </modules>
 
     <dependencies>
         <dependency>

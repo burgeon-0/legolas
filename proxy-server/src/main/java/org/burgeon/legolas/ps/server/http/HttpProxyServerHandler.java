@@ -1,4 +1,4 @@
-package org.burgeon.legolas.server.http;
+package org.burgeon.legolas.ps.server.http;
 
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;

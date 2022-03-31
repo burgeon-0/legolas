@@ -1,4 +1,4 @@
-package org.burgeon.legolas.server.http;
+package org.burgeon.legolas.ps.server.http;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -13,7 +13,7 @@ import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import lombok.SneakyThrows;
-import org.burgeon.legolas.server.ProxyServer;
+import org.burgeon.legolas.ps.server.ProxyServer;
 import org.springframework.stereotype.Component;
 
 /**

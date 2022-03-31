@@ -1,4 +1,4 @@
-package org.burgeon.legolas.server;
+package org.burgeon.legolas.ps.server;
 
 /**
  * 代理服务器
