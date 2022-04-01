@@ -46,7 +46,7 @@ public class HttpProxyServer implements ProxyServer {
                         protected void initChannel(SocketChannel socketChannel) {
                             ChannelPipeline channelPipeline = socketChannel.pipeline();
                             channelPipeline.addLast(new HttpServerCodec());
-                            channelPipeline.addLast(new HttpProxyServerHandler());
+                            channelPipeline.addLast(new HttpProxyInboundHandler());
                         }
                     });
 

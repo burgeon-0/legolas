@@ -24,7 +24,7 @@ import static io.netty.handler.codec.http.HttpResponseStatus.OK;
  * @date 2022/3/30
  */
 @Slf4j
-public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
+public class HttpProxyInboundHandler extends ChannelInboundHandlerAdapter {
 
     @SneakyThrows
     @Override
@@ -60,14 +60,14 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
 
     @SneakyThrows
     private URL getUrl(HttpScheme httpScheme, HttpRequest request) {
-        if (request.uri().contains(request.headers().get(HOST))) {
-            URL url = new URL(StrUtil.format("{}://{}", httpScheme.name(), request.uri()));
-            return url;
-        } else {
-            URL url = new URL(StrUtil.format("{}://{}{}", httpScheme.name(),
-                    request.headers().get(HOST), request.uri()));
-            return url;
+        if (request.uri().contains(httpScheme.name())) {
+            return new URL(request.uri());
         }
+        if (request.uri().contains(request.headers().get(HOST))) {
+            return new URL(StrUtil.format("{}://{}", httpScheme.name(), request.uri()));
+        }
+        return new URL(StrUtil.format("{}://{}{}", httpScheme.name(),
+                request.headers().get(HOST), request.uri()));
     }
 
     private Promise<Channel> createPromise(ChannelHandlerContext ctx, String host, int port) {
@@ -98,7 +98,7 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
         promise.addListener((FutureListener<Channel>) channelFuture -> {
             ChannelPipeline channelPipeline = ctx.pipeline();
             channelPipeline.remove(HttpServerCodec.class);
-            channelPipeline.remove(HttpProxyServerHandler.class);
+            channelPipeline.remove(HttpProxyInboundHandler.class);
             channelPipeline.addLast(new ForwardInboundHandler(channelFuture.getNow()));
             channelFuture.get().writeAndFlush(object);
         });
@@ -111,7 +111,7 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
             ctx.writeAndFlush(response).addListener((ChannelFutureListener) future -> {
                 ChannelPipeline channelPipeline = ctx.pipeline();
                 channelPipeline.remove(HttpServerCodec.class);
-                channelPipeline.remove(HttpProxyServerHandler.class);
+                channelPipeline.remove(HttpProxyInboundHandler.class);
             });
             ChannelPipeline channelPipeline = ctx.pipeline();
             channelPipeline.addLast(new ForwardInboundHandler(channelFuture.getNow()));
