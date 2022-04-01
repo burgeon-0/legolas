@@ -1,26 +1,25 @@
 package org.burgeon.legolas.ps.server.http;
 
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.ContentType;
+import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.*;
+import io.netty.channel.embedded.EmbeddedChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.*;
+import io.netty.util.concurrent.FutureListener;
+import io.netty.util.concurrent.Promise;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
 
 import static io.netty.handler.codec.http.HttpHeaderNames.*;
+import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
-import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 /**
- * HTTP 代理服务器 Handler
- *
  * @author Sam Lu
  * @date 2022/3/30
  */
@@ -32,41 +31,97 @@ public class HttpProxyServerHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         if (msg instanceof HttpRequest) {
             DefaultHttpRequest request = (DefaultHttpRequest) msg;
-            String uri = request.uri();
-            String url = "http://www.baidu.com" + uri;
-            log.info("Call {}", url);
 
-            String result = getResult(url);
-            writeResponse(ctx, result);
+            try {
+                HttpScheme httpScheme = getHttpScheme(request);
+                URL url = getUrl(httpScheme, request);
+                log.info("{} {}", request.method(), url);
+
+                Promise<Channel> promise = createPromise(ctx, url.getHost(), httpScheme.port());
+                if (HttpScheme.HTTP.equals(httpScheme)) {
+                    forwardHttpRequest(ctx, promise, request);
+                } else {
+                    forwardHttpsRequest(ctx, promise, request);
+                }
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                fail(ctx, request, e.toString());
+            }
+        }
+    }
+
+    private HttpScheme getHttpScheme(HttpRequest request) {
+        if (HttpMethod.CONNECT.equals(request.method())) {
+            return HttpScheme.HTTPS;
+        } else {
+            return HttpScheme.HTTP;
         }
     }
 
     @SneakyThrows
-    private String getResult(String url) {
-        URLConnection urlConnection = new URL(url).openConnection();
-        HttpURLConnection connection = (HttpURLConnection) urlConnection;
-        connection.setRequestMethod("GET");
-        connection.connect();
-
-        StringBuilder buffer = new StringBuilder();
-        int responseCode = connection.getResponseCode();
-        if (responseCode == HttpURLConnection.HTTP_OK) {
-            BufferedReader bufferedReader = new BufferedReader(
-                    new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                buffer.append(line).append("\n");
-            }
+    private URL getUrl(HttpScheme httpScheme, HttpRequest request) {
+        if (request.uri().contains(request.headers().get(HOST))) {
+            URL url = new URL(StrUtil.format("{}://{}", httpScheme.name(), request.uri()));
+            return url;
+        } else {
+            URL url = new URL(StrUtil.format("{}://{}{}", httpScheme.name(),
+                    request.headers().get(HOST), request.uri()));
+            return url;
         }
-        connection.disconnect();
-
-        return buffer.toString();
     }
 
-    private void writeResponse(ChannelHandlerContext ctx, String result) {
-        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, OK,
+    private Promise<Channel> createPromise(ChannelHandlerContext ctx, String host, int port) {
+        Promise<Channel> promise = ctx.executor().newPromise();
+        Bootstrap bootstrap = new Bootstrap();
+        bootstrap.group(ctx.channel().eventLoop())
+                .channel(NioSocketChannel.class)
+                .remoteAddress(host, port)
+                .handler(new ForwardInboundHandler(ctx.channel()))
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000)
+                .connect()
+                .addListener((ChannelFutureListener) channelFuture -> {
+                    if (channelFuture.isSuccess()) {
+                        promise.setSuccess(channelFuture.channel());
+                    } else {
+                        ctx.close();
+                        channelFuture.cancel(true);
+                    }
+                });
+        return promise;
+    }
+
+    private void forwardHttpRequest(ChannelHandlerContext ctx, Promise<Channel> promise, HttpRequest request) {
+        EmbeddedChannel embeddedChannel = new EmbeddedChannel(new HttpRequestEncoder());
+        embeddedChannel.writeOutbound(request);
+        Object object = embeddedChannel.readOutbound();
+
+        promise.addListener((FutureListener<Channel>) channelFuture -> {
+            ChannelPipeline channelPipeline = ctx.pipeline();
+            channelPipeline.remove(HttpServerCodec.class);
+            channelPipeline.remove(HttpProxyServerHandler.class);
+            channelPipeline.addLast(new ForwardInboundHandler(channelFuture.getNow()));
+            channelFuture.get().writeAndFlush(object);
+        });
+    }
+
+    private void forwardHttpsRequest(ChannelHandlerContext ctx, Promise<Channel> promise, HttpRequest request) {
+        FullHttpResponse response = new DefaultFullHttpResponse(request.protocolVersion(), OK);
+
+        promise.addListener((FutureListener<Channel>) channelFuture -> {
+            ctx.writeAndFlush(response).addListener((ChannelFutureListener) future -> {
+                ChannelPipeline channelPipeline = ctx.pipeline();
+                channelPipeline.remove(HttpServerCodec.class);
+                channelPipeline.remove(HttpProxyServerHandler.class);
+            });
+            ChannelPipeline channelPipeline = ctx.pipeline();
+            channelPipeline.addLast(new ForwardInboundHandler(channelFuture.getNow()));
+        });
+    }
+
+    private void fail(ChannelHandlerContext ctx, HttpRequest request, String result) {
+        FullHttpResponse response = new DefaultFullHttpResponse(request.protocolVersion(), BAD_REQUEST,
                 Unpooled.wrappedBuffer(result.getBytes()));
-        response.headers().set(CONTENT_TYPE, "text/html");
+        response.headers().set(CONTENT_TYPE, ContentType.TEXT_HTML);
         response.headers().set(CONTENT_LENGTH, response.content().readableBytes());
         response.headers().set(CONNECTION, HttpHeaderValues.KEEP_ALIVE);
         ctx.write(response);
