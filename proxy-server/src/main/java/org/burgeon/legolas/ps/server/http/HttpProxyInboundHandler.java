@@ -37,7 +37,7 @@ public class HttpProxyInboundHandler extends ChannelInboundHandlerAdapter {
                 URL url = getUrl(httpScheme, request);
                 log.info("{} {}", request.method(), url);
 
-                Promise<Channel> promise = createPromise(ctx, url.getHost(), httpScheme.port());
+                Promise<Channel> promise = createPromise(ctx, url.getHost(), url.getPort());
                 if (HttpScheme.HTTP.equals(httpScheme)) {
                     forwardHttpRequest(ctx, promise, request);
                 } else {
@@ -60,7 +60,7 @@ public class HttpProxyInboundHandler extends ChannelInboundHandlerAdapter {
 
     @SneakyThrows
     private URL getUrl(HttpScheme httpScheme, HttpRequest request) {
-        if (request.uri().contains(httpScheme.name())) {
+        if (request.uri().contains(StrUtil.format("{}://", httpScheme.name()))) {
             return new URL(request.uri());
         }
         if (request.uri().contains(request.headers().get(HOST))) {
@@ -96,9 +96,9 @@ public class HttpProxyInboundHandler extends ChannelInboundHandlerAdapter {
         Object object = embeddedChannel.readOutbound();
 
         promise.addListener((FutureListener<Channel>) channelFuture -> {
-            ChannelPipeline channelPipeline = ctx.pipeline();
-            channelPipeline.remove(HttpServerCodec.class);
-            channelPipeline.remove(HttpProxyInboundHandler.class);
+            DefaultChannelPipeline channelPipeline = (DefaultChannelPipeline) ctx.pipeline();
+            channelPipeline.removeIfExists(HttpServerCodec.class);
+            channelPipeline.removeIfExists(HttpProxyInboundHandler.class);
             channelPipeline.addLast(new ForwardInboundHandler(channelFuture.getNow()));
             channelFuture.get().writeAndFlush(object);
         });
@@ -109,9 +109,9 @@ public class HttpProxyInboundHandler extends ChannelInboundHandlerAdapter {
 
         promise.addListener((FutureListener<Channel>) channelFuture -> {
             ctx.writeAndFlush(response).addListener((ChannelFutureListener) future -> {
-                ChannelPipeline channelPipeline = ctx.pipeline();
-                channelPipeline.remove(HttpServerCodec.class);
-                channelPipeline.remove(HttpProxyInboundHandler.class);
+                DefaultChannelPipeline channelPipeline = (DefaultChannelPipeline) ctx.pipeline();
+                channelPipeline.removeIfExists(HttpServerCodec.class);
+                channelPipeline.removeIfExists(HttpProxyInboundHandler.class);
             });
             ChannelPipeline channelPipeline = ctx.pipeline();
             channelPipeline.addLast(new ForwardInboundHandler(channelFuture.getNow()));

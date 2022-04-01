@@ -13,6 +13,7 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import lombok.SneakyThrows;
 import org.burgeon.legolas.ps.server.ProxyServer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -24,8 +25,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class HttpProxyServer implements ProxyServer {
 
-    private String host = "localhost";
-    private int port = 8081;
+    @Value("${http.proxy.host:localhost}")
+    private String host;
+    @Value("${http.proxy.port:9080}")
+    private int port;
 
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
