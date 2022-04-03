@@ -37,16 +37,18 @@ public class NettyHttpUtil {
     @SneakyThrows
     public static URL getRequestUrl(HttpRequest request, HttpScheme httpScheme) {
         // 例如：request.getUri() == http://www.gstatic.com/generate_204
-        if (request.uri().contains(StrUtil.format("{}://", httpScheme.name()))) {
+        String schemeTemplate = "{}://";
+        if (request.uri().contains(StrUtil.format(schemeTemplate, httpScheme.name()))) {
             return new URL(request.uri());
         }
         // 例如：request.getUri() == dss1.bdstatic.com:443
+        String urlTemplate1 = "{}://{}";
         if (request.uri().contains(request.headers().get(HOST))) {
-            return new URL(StrUtil.format("{}://{}", httpScheme.name(), request.uri()));
+            return new URL(StrUtil.format(urlTemplate1, httpScheme.name(), request.uri()));
         }
         // 例如：request.getUri() == /index.html
-        return new URL(StrUtil.format("{}://{}{}", httpScheme.name(),
-                request.headers().get(HOST), request.uri()));
+        String urlTemplate2 = "{}://{}{}";
+        return new URL(StrUtil.format(urlTemplate2, httpScheme.name(), request.headers().get(HOST), request.uri()));
     }
 
     public static int getRequestPort(HttpScheme httpScheme, URL url) {
@@ -79,15 +81,15 @@ public class NettyHttpUtil {
     public static <T extends ChannelHandler> void forwardHttpRequest(ChannelHandlerContext ctx,
                                                                      Promise<Channel> promise,
                                                                      HttpRequest request,
-                                                                     Class<T>... handlerClass) {
+                                                                     Class<T>[] handlerClasses) {
         EmbeddedChannel embeddedChannel = new EmbeddedChannel(new HttpRequestEncoder());
         embeddedChannel.writeOutbound(request);
         Object object = embeddedChannel.readOutbound();
 
         promise.addListener((FutureListener<Channel>) channelFuture -> {
             DefaultChannelPipeline channelPipeline = (DefaultChannelPipeline) ctx.pipeline();
-            if (handlerClass != null) {
-                Arrays.stream(handlerClass).forEach(tClass -> channelPipeline.removeIfExists(tClass));
+            if (handlerClasses != null) {
+                Arrays.stream(handlerClasses).forEach(channelPipeline::removeIfExists);
             }
             channelPipeline.addLast(new ForwardInboundHandler(channelFuture.getNow()));
             channelFuture.get().writeAndFlush(object);
@@ -97,14 +99,14 @@ public class NettyHttpUtil {
     public static <T extends ChannelHandler> void forwardHttpsRequest(ChannelHandlerContext ctx,
                                                                       Promise<Channel> promise,
                                                                       HttpRequest request,
-                                                                      Class<T>... handlerClass) {
+                                                                      Class<T>[] handlerClasses) {
         FullHttpResponse response = new DefaultFullHttpResponse(request.protocolVersion(), OK);
 
         promise.addListener((FutureListener<Channel>) channelFuture -> {
             ctx.writeAndFlush(response).addListener((ChannelFutureListener) future -> {
                 DefaultChannelPipeline channelPipeline = (DefaultChannelPipeline) ctx.pipeline();
-                if (handlerClass != null) {
-                    Arrays.stream(handlerClass).forEach(tClass -> channelPipeline.removeIfExists(tClass));
+                if (handlerClasses != null) {
+                    Arrays.stream(handlerClasses).forEach(channelPipeline::removeIfExists);
                 }
             });
             ctx.pipeline().addLast(new ForwardInboundHandler(channelFuture.getNow()));
