@@ -1,8 +1,9 @@
-package org.burgeon.legolas.ps.server.http;
+package org.burgeon.legolas.common.handler;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import lombok.SneakyThrows;
 
 /**
  * @author Sam Lu
@@ -16,13 +17,15 @@ public class ForwardInboundHandler extends ChannelInboundHandlerAdapter {
         this.outChannel = outChannel;
     }
 
+    @SneakyThrows
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
         outChannel.write(msg);
     }
 
+    @SneakyThrows
     @Override
-    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+    public void channelReadComplete(ChannelHandlerContext ctx) {
         outChannel.flush();
     }
 

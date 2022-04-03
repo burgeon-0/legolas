@@ -1,8 +1,8 @@
-package org.burgeon.legolas.ps;
+package org.burgeon.legolas.pc;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.burgeon.legolas.ps.server.socks.Socks5ProxyServer;
+import org.burgeon.legolas.pc.proxy.http.HttpProxy;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -10,14 +10,14 @@ import javax.annotation.PostConstruct;
 
 /**
  * @author Sam Lu
- * @date 2022/3/26
+ * @date 2022/4/2
  */
 @Slf4j
 @SpringBootApplication
 @RequiredArgsConstructor
 public class Application {
 
-    private final Socks5ProxyServer socks5ProxyServer;
+    private final HttpProxy httpProxy;
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
@@ -26,10 +26,10 @@ public class Application {
     @PostConstruct
     public void start() {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            log.info("Server stopping...");
-            socks5ProxyServer.stop();
+            log.info("Proxy stopping...");
+            httpProxy.stop();
         }));
-        socks5ProxyServer.start();
+        httpProxy.start();
     }
 
 }

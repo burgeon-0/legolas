@@ -11,19 +11,11 @@
     </parent>
 
     <groupId>org.burgeon.legolas</groupId>
-    <artifactId>proxy-server</artifactId>
+    <artifactId>common</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>proxy-server</name>
-    <description>Netty Proxy Server</description>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.burgeon.legolas</groupId>
-            <artifactId>common</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-        </dependency>
-    </dependencies>
+    <name>common</name>
+    <description>Legolas Common</description>
 
 </project>

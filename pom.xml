@@ -26,6 +26,7 @@
     <modules>
         <module>proxy-server</module>
         <module>proxy-client</module>
+        <module>common</module>
     </modules>
 
     <repositories>
@@ -55,16 +56,16 @@
         </dependency>
 
         <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>5.8.0.M1</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.22</version>
             <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>cn.hutool</groupId>
-            <artifactId>hutool-all</artifactId>
-            <version>5.8.0.M1</version>
         </dependency>
 
         <dependency>

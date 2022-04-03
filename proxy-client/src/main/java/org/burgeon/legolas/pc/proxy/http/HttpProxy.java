@@ -1,9 +1,7 @@
-package org.burgeon.legolas.ps.server.http;
+package org.burgeon.legolas.pc.proxy.http;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
@@ -12,23 +10,25 @@ import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import lombok.SneakyThrows;
-import org.burgeon.legolas.ps.server.ProxyServer;
+import org.burgeon.legolas.pc.proxy.Proxy;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
- * HTTP 代理服务器
+ * HTTP 代理
  *
  * @author Sam Lu
- * @date 2022/3/28
+ * @date 2022/4/2
  */
 @Component
-public class HttpProxyServer implements ProxyServer {
+public class HttpProxy implements Proxy {
 
     @Value("${http.proxy.host:localhost}")
     private String host;
     @Value("${http.proxy.port:9080}")
     private int port;
+    @Value("${http.proxy.connect.timeout:10000}")
+    private int timeout;
 
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
@@ -47,14 +47,14 @@ public class HttpProxyServer implements ProxyServer {
                         @SneakyThrows
                         @Override
                         protected void initChannel(SocketChannel socketChannel) {
-                            ChannelPipeline channelPipeline = socketChannel.pipeline();
-                            channelPipeline.addLast(new HttpServerCodec());
-                            channelPipeline.addLast(new HttpProxyInboundHandler());
+                            socketChannel.pipeline()
+                                    .addLast(new HttpServerCodec())
+                                    .addLast(new HttpProxyInboundHandler(timeout));
                         }
                     });
 
-            ChannelFuture channelFuture = serverBootstrap.bind(host, port).sync();
-            channelFuture.channel().closeFuture().sync();
+            serverBootstrap.bind(host, port).sync()
+                    .channel().closeFuture().sync();
         } finally {
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();

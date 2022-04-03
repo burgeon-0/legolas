@@ -2,6 +2,7 @@ package org.burgeon.legolas.ps.server.socks;
 
 import org.burgeon.legolas.ps.server.ProxyServer;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 /**
  * SOCKS5 代理服务器
@@ -9,11 +10,12 @@ import org.springframework.beans.factory.annotation.Value;
  * @author Sam Lu
  * @date 2022/4/1
  */
+@Component
 public class Socks5ProxyServer implements ProxyServer {
 
-    @Value("${socks.proxy.host:localhost}")
+    @Value("${socks.proxy.server.host:localhost}")
     private String host;
-    @Value("${http.proxy.port:1080}")
+    @Value("${socks.proxy.server.port:11080}")
     private int port;
 
     @Override
