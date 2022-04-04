@@ -4,16 +4,18 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Sam Lu
  * @date 2022/3/31
  */
-public class ForwardInboundHandler extends ChannelInboundHandlerAdapter {
+@Slf4j
+public class ForwardHandler extends ChannelInboundHandlerAdapter {
 
-    private Channel outChannel;
+    private final Channel outChannel;
 
-    public ForwardInboundHandler(Channel outChannel) {
+    public ForwardHandler(Channel outChannel) {
         this.outChannel = outChannel;
     }
 
@@ -27,6 +29,13 @@ public class ForwardInboundHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) {
         outChannel.flush();
+    }
+
+    @SneakyThrows
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        log.error(cause.getMessage(), cause);
+        ctx.close();
     }
 
 }

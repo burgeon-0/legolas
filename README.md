@@ -1,4 +1,4 @@
-# Netty Proxy Server
+# Netty Proxy
 
 ## 支持协议
 
@@ -16,3 +16,9 @@ HTTP、SOCKS5
 - [HTTP Server with Netty](https://www.baeldung.com/java-netty-http-server)
 - [Netty实现简单HTTP代理服务器](https://cloud.tencent.com/developer/article/1550332)
 - [45 张图深度解析 Netty 架构与原理](https://cloud.tencent.com/developer/article/1754078)
+- [socks5协议原理学习](https://cloud.tencent.com/developer/article/1802233)
+- [SOCKS Protocol Version 5](https://www.ietf.org/rfc/rfc1928.txt)
+- [Username/Password Authentication for SOCKS V5](https://www.ietf.org/rfc/rfc1929.txt)
+- [netty-proxy-server](https://github.com/kongwu-/netty-proxy-server)
+- [trojan-client-netty](https://github.com/kdyzm/trojan-client-netty)
+- [Netty in the Middle](https://github.com/chhsiao90/nitmproxy)

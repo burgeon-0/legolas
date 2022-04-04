@@ -11,10 +11,10 @@ import io.netty.handler.codec.http.*;
 import io.netty.util.concurrent.FutureListener;
 import io.netty.util.concurrent.Promise;
 import lombok.SneakyThrows;
-import org.burgeon.legolas.common.handler.ForwardInboundHandler;
+import org.burgeon.legolas.common.handler.ForwardHandler;
 
 import java.net.URL;
-import java.util.Arrays;
+import java.util.List;
 
 import static io.netty.handler.codec.http.HttpHeaderNames.*;
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
@@ -64,7 +64,7 @@ public class NettyHttpUtil {
         bootstrap.group(ctx.channel().eventLoop())
                 .channel(NioSocketChannel.class)
                 .remoteAddress(host, port)
-                .handler(new ForwardInboundHandler(ctx.channel()))
+                .handler(new ForwardHandler(ctx.channel()))
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, timeout)
                 .connect()
                 .addListener((ChannelFutureListener) channelFuture -> {
@@ -78,10 +78,10 @@ public class NettyHttpUtil {
         return promise;
     }
 
-    public static <T extends ChannelHandler> void forwardHttpRequest(ChannelHandlerContext ctx,
-                                                                     Promise<Channel> promise,
-                                                                     HttpRequest request,
-                                                                     Class<T>[] handlerClasses) {
+    public static void forwardHttpRequest(ChannelHandlerContext ctx,
+                                          Promise<Channel> promise,
+                                          HttpRequest request,
+                                          List<Class<? extends ChannelHandler>> handlerClasses) {
         EmbeddedChannel embeddedChannel = new EmbeddedChannel(new HttpRequestEncoder());
         embeddedChannel.writeOutbound(request);
         Object object = embeddedChannel.readOutbound();
@@ -89,27 +89,27 @@ public class NettyHttpUtil {
         promise.addListener((FutureListener<Channel>) channelFuture -> {
             DefaultChannelPipeline channelPipeline = (DefaultChannelPipeline) ctx.pipeline();
             if (handlerClasses != null) {
-                Arrays.stream(handlerClasses).forEach(channelPipeline::removeIfExists);
+                handlerClasses.forEach(channelPipeline::removeIfExists);
             }
-            channelPipeline.addLast(new ForwardInboundHandler(channelFuture.getNow()));
+            channelPipeline.addLast(new ForwardHandler(channelFuture.getNow()));
             channelFuture.get().writeAndFlush(object);
         });
     }
 
-    public static <T extends ChannelHandler> void forwardHttpsRequest(ChannelHandlerContext ctx,
-                                                                      Promise<Channel> promise,
-                                                                      HttpRequest request,
-                                                                      Class<T>[] handlerClasses) {
+    public static void forwardHttpsRequest(ChannelHandlerContext ctx,
+                                           Promise<Channel> promise,
+                                           HttpRequest request,
+                                           List<Class<? extends ChannelHandler>> handlerClasses) {
         FullHttpResponse response = new DefaultFullHttpResponse(request.protocolVersion(), OK);
 
         promise.addListener((FutureListener<Channel>) channelFuture -> {
             ctx.writeAndFlush(response).addListener((ChannelFutureListener) future -> {
                 DefaultChannelPipeline channelPipeline = (DefaultChannelPipeline) ctx.pipeline();
                 if (handlerClasses != null) {
-                    Arrays.stream(handlerClasses).forEach(channelPipeline::removeIfExists);
+                    handlerClasses.forEach(channelPipeline::removeIfExists);
                 }
             });
-            ctx.pipeline().addLast(new ForwardInboundHandler(channelFuture.getNow()));
+            ctx.pipeline().addLast(new ForwardHandler(channelFuture.getNow()));
         });
     }
 

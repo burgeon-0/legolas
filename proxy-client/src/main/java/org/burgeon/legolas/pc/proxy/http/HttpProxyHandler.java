@@ -1,12 +1,10 @@
 package org.burgeon.legolas.pc.proxy.http;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.handler.codec.http.DefaultHttpRequest;
-import io.netty.handler.codec.http.HttpRequest;
-import io.netty.handler.codec.http.HttpScheme;
-import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.http.*;
 import io.netty.util.concurrent.Promise;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
@@ -14,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.burgeon.legolas.common.util.NettyHttpUtil;
 
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Sam Lu
@@ -21,13 +21,13 @@ import java.net.URL;
  */
 @Slf4j
 @AllArgsConstructor
-public class HttpProxyInboundHandler extends ChannelInboundHandlerAdapter {
+public class HttpProxyHandler extends SimpleChannelInboundHandler<HttpObject> {
 
     private int timeout;
 
     @SneakyThrows
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+    public void channelRead0(ChannelHandlerContext ctx, HttpObject msg) {
         if (msg instanceof HttpRequest) {
             DefaultHttpRequest request = (DefaultHttpRequest) msg;
 
@@ -38,12 +38,12 @@ public class HttpProxyInboundHandler extends ChannelInboundHandlerAdapter {
 
                 Promise<Channel> promise = NettyHttpUtil.createPromise(ctx, url.getHost(),
                         NettyHttpUtil.getRequestPort(httpScheme, url), timeout);
+                List<Class<? extends ChannelHandler>> classes = Arrays.asList(HttpServerCodec.class,
+                        HttpProxyHandler.class);
                 if (HttpScheme.HTTP.equals(httpScheme)) {
-                    NettyHttpUtil.forwardHttpRequest(ctx, promise, request,
-                            new Class[]{HttpServerCodec.class, HttpProxyInboundHandler.class});
+                    NettyHttpUtil.forwardHttpRequest(ctx, promise, request, classes);
                 } else {
-                    NettyHttpUtil.forwardHttpsRequest(ctx, promise, request,
-                            new Class[]{HttpServerCodec.class, HttpProxyInboundHandler.class});
+                    NettyHttpUtil.forwardHttpsRequest(ctx, promise, request, classes);
                 }
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
