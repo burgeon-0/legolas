@@ -17,6 +17,8 @@ public class Socks5ProxyServer implements ProxyServer {
     private String host;
     @Value("${socks.proxy.server.port:11080}")
     private int port;
+    @Value("${socks.proxy.connect.timeout:10000}")
+    private int timeout;
 
     @Override
     public void start() {

@@ -1,4 +1,4 @@
-package org.burgeon.legolas.common.handler;
+package org.burgeon.legolas.common.handler.socks;
 
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;

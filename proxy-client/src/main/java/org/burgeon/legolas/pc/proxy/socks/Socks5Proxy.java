@@ -9,6 +9,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import lombok.SneakyThrows;
+import org.burgeon.legolas.common.handler.socks.Socks5Initializer;
 import org.burgeon.legolas.pc.proxy.Proxy;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -47,7 +48,7 @@ public class Socks5Proxy implements Proxy {
                         @Override
                         protected void initChannel(SocketChannel socketChannel) {
                             socketChannel.pipeline()
-                                    .addLast(new Socks5Initializer(timeout));
+                                    .addLast(new Socks5Initializer(new Socks5ProxyHandler(timeout)));
                         }
                     });
 

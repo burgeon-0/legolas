@@ -9,6 +9,7 @@ import io.netty.handler.codec.socksx.v5.*;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.burgeon.legolas.common.handler.socks.Socks5ConnectHandler;
 import org.burgeon.legolas.common.util.NettySocksUtil;
 
 /**

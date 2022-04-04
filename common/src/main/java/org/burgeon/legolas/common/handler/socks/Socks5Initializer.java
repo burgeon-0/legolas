@@ -1,7 +1,9 @@
-package org.burgeon.legolas.pc.proxy.socks;
+package org.burgeon.legolas.common.handler.socks;
 
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.socksx.SocksMessage;
 import io.netty.handler.codec.socksx.SocksPortUnificationServerHandler;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
@@ -13,14 +15,14 @@ import lombok.SneakyThrows;
 @AllArgsConstructor
 public class Socks5Initializer extends ChannelInitializer<SocketChannel> {
 
-    private int timeout;
+    private SimpleChannelInboundHandler<SocksMessage> processHandler;
 
     @SneakyThrows
     @Override
     protected void initChannel(SocketChannel ch) {
         ch.pipeline().addLast(
                 new SocksPortUnificationServerHandler(),
-                new Socks5ProxyHandler(timeout));
+                processHandler);
     }
 
 }

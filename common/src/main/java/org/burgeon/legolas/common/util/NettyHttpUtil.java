@@ -11,7 +11,7 @@ import io.netty.handler.codec.http.*;
 import io.netty.util.concurrent.FutureListener;
 import io.netty.util.concurrent.Promise;
 import lombok.SneakyThrows;
-import org.burgeon.legolas.common.handler.ForwardHandler;
+import org.burgeon.legolas.common.handler.http.ForwardHandler;
 
 import java.net.URL;
 import java.util.List;
