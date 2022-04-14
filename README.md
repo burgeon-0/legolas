@@ -19,6 +19,7 @@ HTTP、SOCKS5
 - [socks5协议原理学习](https://cloud.tencent.com/developer/article/1802233)
 - [SOCKS Protocol Version 5](https://www.ietf.org/rfc/rfc1928.txt)
 - [Username/Password Authentication for SOCKS V5](https://www.ietf.org/rfc/rfc1929.txt)
+- [Netty 实战精髓篇](https://www.w3cschool.cn/essential_netty_in_action/)
 - [netty-proxy-server](https://github.com/kongwu-/netty-proxy-server)
 - [trojan-client-netty](https://github.com/kdyzm/trojan-client-netty)
 - [Netty in the Middle](https://github.com/chhsiao90/nitmproxy)

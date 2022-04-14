@@ -35,7 +35,6 @@ public class Application {
             httpProxy.stop();
             socks5Proxy.stop();
         }));
-
         ThreadUtil.execute(httpProxy::start);
         ThreadUtil.execute(socks5Proxy::start);
     }

@@ -103,8 +103,8 @@ public class NettyHttpUtil {
         FullHttpResponse response = new DefaultFullHttpResponse(request.protocolVersion(), OK);
 
         promise.addListener((FutureListener<Channel>) channelFuture -> {
+            DefaultChannelPipeline channelPipeline = (DefaultChannelPipeline) ctx.pipeline();
             ctx.writeAndFlush(response).addListener((ChannelFutureListener) future -> {
-                DefaultChannelPipeline channelPipeline = (DefaultChannelPipeline) ctx.pipeline();
                 if (handlerClasses != null) {
                     handlerClasses.forEach(channelPipeline::removeIfExists);
                 }

@@ -6,10 +6,10 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.socksx.SocksPortUnificationServerHandler;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import lombok.SneakyThrows;
-import org.burgeon.legolas.common.handler.socks.Socks5Initializer;
 import org.burgeon.legolas.pc.proxy.Proxy;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -23,10 +23,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class Socks5Proxy implements Proxy {
 
+    @Value("${socks.proxy.server.host:localhost}")
+    private String serverHost;
+    @Value("${socks.proxy.server.port:11080}")
+    private int serverPort;
     @Value("${socks.proxy.host:localhost}")
     private String host;
     @Value("${socks.proxy.port:1080}")
     private int port;
+    @Value("${socks.proxy.secret:35b2a720-a08b-ec5e-6fd5-d09a8fc1df0c}")
+    private String secret;
     @Value("${socks.proxy.connect.timeout:10000}")
     private int timeout;
 
@@ -48,7 +54,8 @@ public class Socks5Proxy implements Proxy {
                         @Override
                         protected void initChannel(SocketChannel socketChannel) {
                             socketChannel.pipeline()
-                                    .addLast(new Socks5Initializer(new Socks5ProxyHandler(timeout)));
+                                    .addLast(new SocksPortUnificationServerHandler())
+                                    .addLast(new Socks5ProxyHandler(serverHost, serverPort, secret, timeout));
                         }
                     });
 

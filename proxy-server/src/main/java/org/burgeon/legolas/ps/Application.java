@@ -1,5 +1,6 @@
 package org.burgeon.legolas.ps;
 
+import cn.hutool.core.thread.ThreadUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.burgeon.legolas.ps.server.socks.Socks5ProxyServer;
@@ -29,7 +30,7 @@ public class Application {
             log.info("Server stopping...");
             socks5ProxyServer.stop();
         }));
-        socks5ProxyServer.start();
+        ThreadUtil.execute(socks5ProxyServer::start);
     }
 
 }

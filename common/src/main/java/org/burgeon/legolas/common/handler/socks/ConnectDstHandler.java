@@ -12,11 +12,11 @@ import lombok.extern.slf4j.Slf4j;
  * @date 2022/4/4
  */
 @Slf4j
-public class DirectClientHandler extends ChannelInboundHandlerAdapter {
+public class ConnectDstHandler extends ChannelInboundHandlerAdapter {
 
     private final Promise<Channel> promise;
 
-    public DirectClientHandler(Promise<Channel> promise) {
+    public ConnectDstHandler(Promise<Channel> promise) {
         this.promise = promise;
     }
 

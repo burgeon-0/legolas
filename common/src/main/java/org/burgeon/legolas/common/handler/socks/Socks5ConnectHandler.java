@@ -1,17 +1,19 @@
 package org.burgeon.legolas.common.handler.socks;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.*;
-import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.socksx.v5.DefaultSocks5CommandRequest;
-import io.netty.handler.codec.socksx.v5.DefaultSocks5CommandResponse;
-import io.netty.handler.codec.socksx.v5.Socks5CommandStatus;
-import io.netty.util.concurrent.FutureListener;
 import io.netty.util.concurrent.Promise;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.burgeon.legolas.common.util.NettySocksUtil;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Sam Lu
@@ -27,53 +29,9 @@ public class Socks5ConnectHandler extends SimpleChannelInboundHandler<DefaultSoc
     @Override
     public void channelRead0(ChannelHandlerContext ctx, DefaultSocks5CommandRequest msg) {
         Bootstrap bootstrap = new Bootstrap();
-        Promise<Channel> promise = createPromise(ctx, msg);
-        handleInboundChannel(ctx, bootstrap, promise);
-        connectDst(ctx, msg, bootstrap);
-    }
-
-    private Promise<Channel> createPromise(ChannelHandlerContext ctx, DefaultSocks5CommandRequest msg) {
-        Promise<Channel> promise = ctx.executor().newPromise();
-        promise.addListener((FutureListener<Channel>) future -> {
-            Channel outboundChannel = future.getNow();
-            if (future.isSuccess()) {
-                ChannelFuture responseFuture = ctx.channel().writeAndFlush(new DefaultSocks5CommandResponse(
-                        Socks5CommandStatus.SUCCESS,
-                        msg.dstAddrType(),
-                        msg.dstAddr(),
-                        msg.dstPort()));
-
-                responseFuture.addListener((ChannelFutureListener) channelFuture -> {
-                    ctx.pipeline().remove(Socks5ConnectHandler.this);
-                    outboundChannel.pipeline().addLast(new RelayHandler(ctx.channel()));
-                    ctx.pipeline().addLast(new RelayHandler(outboundChannel));
-                });
-            } else {
-                ctx.channel().writeAndFlush(new DefaultSocks5CommandResponse(Socks5CommandStatus.FAILURE,
-                        msg.dstAddrType()));
-                NettySocksUtil.closeOnFlush(ctx.channel());
-            }
-        });
-        return promise;
-    }
-
-    private void handleInboundChannel(ChannelHandlerContext ctx, Bootstrap bootstrap, Promise<Channel> promise) {
-        Channel inboundChannel = ctx.channel();
-        bootstrap.group(inboundChannel.eventLoop())
-                .channel(NioSocketChannel.class)
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, timeout)
-                .option(ChannelOption.SO_KEEPALIVE, true)
-                .handler(new DirectClientHandler(promise));
-    }
-
-    private void connectDst(ChannelHandlerContext ctx, DefaultSocks5CommandRequest msg, Bootstrap bootstrap) {
-        bootstrap.connect(msg.dstAddr(), msg.dstPort()).addListener((ChannelFutureListener) future -> {
-            if (!future.isSuccess()) {
-                ctx.channel().writeAndFlush(new DefaultSocks5CommandResponse(Socks5CommandStatus.FAILURE,
-                        msg.dstAddrType()));
-                NettySocksUtil.closeOnFlush(ctx.channel());
-            }
-        });
+        List<Class<? extends ChannelHandler>> classes = Arrays.asList(Socks5ConnectHandler.class);
+        Promise<Channel> promise = NettySocksUtil.createPromise(ctx, msg, classes);
+        NettySocksUtil.connectDst(ctx, msg, bootstrap, promise, timeout);
     }
 
     @SneakyThrows
