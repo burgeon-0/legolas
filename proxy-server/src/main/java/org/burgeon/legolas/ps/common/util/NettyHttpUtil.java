@@ -1,4 +1,4 @@
-package org.burgeon.legolas.common.util;
+package org.burgeon.legolas.ps.common.util;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.ContentType;
@@ -11,7 +11,7 @@ import io.netty.handler.codec.http.*;
 import io.netty.util.concurrent.FutureListener;
 import io.netty.util.concurrent.Promise;
 import lombok.SneakyThrows;
-import org.burgeon.legolas.common.handler.http.ForwardHandler;
+import org.burgeon.legolas.ps.common.handler.http.ForwardHandler;
 
 import java.net.URL;
 import java.util.List;

@@ -1,4 +1,4 @@
-package org.burgeon.legolas.common.util;
+package org.burgeon.legolas.ps.common.util;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.Unpooled;
@@ -9,8 +9,8 @@ import io.netty.handler.codec.socksx.v5.DefaultSocks5CommandResponse;
 import io.netty.handler.codec.socksx.v5.Socks5CommandStatus;
 import io.netty.util.concurrent.FutureListener;
 import io.netty.util.concurrent.Promise;
-import org.burgeon.legolas.common.handler.socks.ConnectDstHandler;
-import org.burgeon.legolas.common.handler.socks.RelayHandler;
+import org.burgeon.legolas.ps.common.handler.socks.ConnectDstHandler;
+import org.burgeon.legolas.ps.common.handler.socks.RelayHandler;
 
 import java.util.List;
 

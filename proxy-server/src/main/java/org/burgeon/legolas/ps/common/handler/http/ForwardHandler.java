@@ -1,4 +1,4 @@
-package org.burgeon.legolas.common.handler.http;
+package org.burgeon.legolas.ps.common.handler.http;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;

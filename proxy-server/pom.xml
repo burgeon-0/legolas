@@ -18,12 +18,4 @@
     <name>proxy-server</name>
     <description>Netty Proxy Server</description>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.burgeon.legolas</groupId>
-            <artifactId>common</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-        </dependency>
-    </dependencies>
-
 </project>

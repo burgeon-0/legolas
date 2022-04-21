@@ -1,22 +1,16 @@
-package org.burgeon.legolas.pc.proxy.socks;
+package org.burgeon.legolas.ps.proxy.socks;
 
-import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.*;
-import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.socksx.SocksMessage;
 import io.netty.handler.codec.socksx.SocksVersion;
 import io.netty.handler.codec.socksx.v5.*;
-import io.netty.util.concurrent.Promise;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.burgeon.legolas.common.handler.socks.ConnectDstHandler;
-import org.burgeon.legolas.common.handler.socks.Socks5ConnectHandler;
-import org.burgeon.legolas.common.util.NettySocksUtil;
-
-import java.util.Arrays;
-import java.util.List;
+import org.burgeon.legolas.ps.common.handler.socks.Socks5ConnectHandler;
+import org.burgeon.legolas.ps.common.util.NettySocksUtil;
 
 /**
  * @author Sam Lu
@@ -26,9 +20,6 @@ import java.util.List;
 @AllArgsConstructor
 public class Socks5ProxyHandler extends SimpleChannelInboundHandler<SocksMessage> {
 
-    private String host;
-    private int port;
-    private String secret;
     private int timeout;
 
     @SneakyThrows
@@ -61,24 +52,6 @@ public class Socks5ProxyHandler extends SimpleChannelInboundHandler<SocksMessage
         } else {
             ctx.close();
         }
-    }
-
-    private void connectServer(ChannelHandlerContext ctx, DefaultSocks5CommandRequest msg) {
-        List<Class<? extends ChannelHandler>> classes = Arrays.asList(this.getClass());
-        Promise<Channel> promise = NettySocksUtil.createPromise(ctx, msg, classes);
-        Bootstrap bootstrap = new Bootstrap();
-        bootstrap.group(ctx.channel().eventLoop())
-                .channel(NioSocketChannel.class)
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, timeout)
-                .option(ChannelOption.SO_KEEPALIVE, true)
-                .handler(new ConnectDstHandler(promise))
-                .connect(host, port).addListener((ChannelFutureListener) future -> {
-                    if (!future.isSuccess()) {
-                        ctx.channel().writeAndFlush(new DefaultSocks5CommandResponse(Socks5CommandStatus.FAILURE,
-                                msg.dstAddrType()));
-                        NettySocksUtil.closeOnFlush(ctx.channel());
-                    }
-                });
     }
 
     @SneakyThrows

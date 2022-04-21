@@ -1,4 +1,4 @@
-package org.burgeon.legolas.pc.proxy.http;
+package org.burgeon.legolas.ps.proxy.http;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
@@ -9,7 +9,7 @@ import io.netty.util.concurrent.Promise;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.burgeon.legolas.common.util.NettyHttpUtil;
+import org.burgeon.legolas.ps.common.util.NettyHttpUtil;
 
 import java.net.URL;
 import java.util.Arrays;
