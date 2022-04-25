@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class HttpProxy implements Proxy {
 
-    @Value("${http.proxy.host:localhost}")
+    @Value("${http.proxy.host:0.0.0.0}")
     private String host;
     @Value("${http.proxy.port:9080}")
     private int port;

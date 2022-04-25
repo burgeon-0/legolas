@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class Socks5Proxy implements Proxy {
 
-    @Value("${socks.proxy.host:localhost}")
+    @Value("${socks.proxy.host:0.0.0.0}")
     private String host;
     @Value("${socks.proxy.port:1080}")
     private int port;
