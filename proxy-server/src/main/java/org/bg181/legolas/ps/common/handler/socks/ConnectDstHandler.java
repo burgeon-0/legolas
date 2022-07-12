@@ -1,4 +1,4 @@
-package org.burgeon.legolas.ps.common.handler.socks;
+package org.bg181.legolas.ps.common.handler.socks;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;

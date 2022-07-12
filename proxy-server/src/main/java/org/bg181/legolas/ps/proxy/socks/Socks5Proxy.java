@@ -1,4 +1,4 @@
-package org.burgeon.legolas.ps.proxy.http;
+package org.bg181.legolas.ps.proxy.socks;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelInitializer;
@@ -6,28 +6,28 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.codec.socksx.SocksPortUnificationServerHandler;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import lombok.SneakyThrows;
-import org.burgeon.legolas.ps.proxy.Proxy;
+import org.bg181.legolas.ps.proxy.Proxy;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
- * HTTP 代理
+ * SOCKS5 代理
  *
  * @author Sam Lu
- * @date 2022/4/2
+ * @date 2022/4/3
  */
 @Component
-public class HttpProxy implements Proxy {
+public class Socks5Proxy implements Proxy {
 
-    @Value("${http.proxy.host:0.0.0.0}")
+    @Value("${socks.proxy.host:0.0.0.0}")
     private String host;
-    @Value("${http.proxy.port:9080}")
+    @Value("${socks.proxy.port:1080}")
     private int port;
-    @Value("${http.proxy.connect.timeout:10000}")
+    @Value("${socks.proxy.connect.timeout:10000}")
     private int timeout;
 
     private EventLoopGroup bossGroup;
@@ -48,8 +48,8 @@ public class HttpProxy implements Proxy {
                         @Override
                         protected void initChannel(SocketChannel socketChannel) {
                             socketChannel.pipeline()
-                                    .addLast(new HttpServerCodec())
-                                    .addLast(new HttpProxyHandler(timeout));
+                                    .addLast(new SocksPortUnificationServerHandler())
+                                    .addLast(new Socks5ProxyHandler(timeout));
                         }
                     });
 
@@ -61,7 +61,6 @@ public class HttpProxy implements Proxy {
         }
     }
 
-    @SneakyThrows
     @Override
     public void stop() {
         workerGroup.shutdownGracefully();

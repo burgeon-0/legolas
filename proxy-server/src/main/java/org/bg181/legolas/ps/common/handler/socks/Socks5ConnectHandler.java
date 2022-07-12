@@ -1,4 +1,4 @@
-package org.burgeon.legolas.ps.common.handler.socks;
+package org.bg181.legolas.ps.common.handler.socks;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -10,7 +10,7 @@ import io.netty.util.concurrent.Promise;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.burgeon.legolas.ps.common.util.NettySocksUtil;
+import org.bg181.legolas.ps.common.util.NettySocksUtil;
 
 import java.util.Arrays;
 import java.util.List;

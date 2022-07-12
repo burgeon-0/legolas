@@ -1,11 +1,11 @@
-package org.burgeon.legolas.ps;
+package org.bg181.legolas.ps;
 
 import cn.hutool.core.thread.ThreadUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.burgeon.legolas.ps.proxy.http.HttpProxy;
-import org.burgeon.legolas.ps.proxy.socks.Socks5Proxy;
+import org.bg181.legolas.ps.proxy.http.HttpProxy;
+import org.bg181.legolas.ps.proxy.socks.Socks5Proxy;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

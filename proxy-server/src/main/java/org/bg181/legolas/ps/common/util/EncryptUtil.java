@@ -1,4 +1,4 @@
-package org.burgeon.legolas.ps.common.util;
+package org.bg181.legolas.ps.common.util;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

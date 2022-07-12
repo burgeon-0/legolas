@@ -1,4 +1,4 @@
-package org.burgeon.legolas.ps.proxy.socks;
+package org.bg181.legolas.ps.proxy.socks;
 
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -9,8 +9,8 @@ import io.netty.handler.codec.socksx.v5.*;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.burgeon.legolas.ps.common.handler.socks.Socks5ConnectHandler;
-import org.burgeon.legolas.ps.common.util.NettySocksUtil;
+import org.bg181.legolas.ps.common.handler.socks.Socks5ConnectHandler;
+import org.bg181.legolas.ps.common.util.NettySocksUtil;
 
 /**
  * @author Sam Lu

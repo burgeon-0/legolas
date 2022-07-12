@@ -1,4 +1,4 @@
-package org.burgeon.legolas.ps.proxy;
+package org.bg181.legolas.ps.proxy;
 
 /**
  * 代理

@@ -10,7 +10,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
-    <groupId>org.burgeon</groupId>
+    <groupId>org.bg181</groupId>
     <artifactId>legolas</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
